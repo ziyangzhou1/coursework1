@@ -24,3 +24,216 @@ You can add options to executable code like this
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
+
+
+
+
+##
+Part 3:Forward selection algorithm
+a
+library(ISLR2)
+library(leaps)
+data(Hitters)
+attach(Hitters)
+Hitters <- na.omit(Hitters)
+b
+null <- lm(Salary~1)
+summary(null)
+## 
+## Call:
+## lm(formula = Salary ~ 1)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -468.4 -345.9 -110.9  214.1 1924.1 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)   535.93      27.82   19.27   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 451.1 on 262 degrees of freedom
+##   (59 observations deleted due to missingness)
+The estimate for the intercept is 535.93,which means that,on average,the salary is predicted to be 535.93 when using this model.The Std. Error(27.82) indicates the standard error of this estimate.The p-value (Pr<2e-16) show that this intercept is highly statistically significant.
+c
+r.squared <- numeric()
+variables <- colnames(Hitters)[colnames(Hitters)!="Salary"]
+for(var in variables){
+  model <- lm(Salary~Hitters[[var]],data=Hitters)
+  r.squared[var] <- summary(model)$r.squared
+}
+best <- names(which.max(r.squared))
+best
+## [1] "CRBI"
+max(r.squared)
+## [1] 0.3214501
+The variable CRBI is the one that increases the R^2 value the most when added to the null model,with an R^2 value of 0.3215.This means that 32.15% of the variance in salary can be explained by the CRBI variable alone.
+d
+stepwise <- regsubsets(Salary~.,data=Hitters,nvmax=19,method="forward")
+(sum.step <- summary(stepwise))
+## Subset selection object
+## Call: regsubsets.formula(Salary ~ ., data = Hitters, nvmax = 19, method = "forward")
+## 19 Variables  (and intercept)
+##            Forced in Forced out
+## AtBat          FALSE      FALSE
+## Hits           FALSE      FALSE
+## HmRun          FALSE      FALSE
+## Runs           FALSE      FALSE
+## RBI            FALSE      FALSE
+## Walks          FALSE      FALSE
+## Years          FALSE      FALSE
+## CAtBat         FALSE      FALSE
+## CHits          FALSE      FALSE
+## CHmRun         FALSE      FALSE
+## CRuns          FALSE      FALSE
+## CRBI           FALSE      FALSE
+## CWalks         FALSE      FALSE
+## LeagueN        FALSE      FALSE
+## DivisionW      FALSE      FALSE
+## PutOuts        FALSE      FALSE
+## Assists        FALSE      FALSE
+## Errors         FALSE      FALSE
+## NewLeagueN     FALSE      FALSE
+## 1 subsets of each size up to 19
+## Selection Algorithm: forward
+##           AtBat Hits HmRun Runs RBI Walks Years CAtBat CHits CHmRun CRuns CRBI
+## 1  ( 1 )  " "   " "  " "   " "  " " " "   " "   " "    " "   " "    " "   "*" 
+## 2  ( 1 )  " "   "*"  " "   " "  " " " "   " "   " "    " "   " "    " "   "*" 
+## 3  ( 1 )  " "   "*"  " "   " "  " " " "   " "   " "    " "   " "    " "   "*" 
+## 4  ( 1 )  " "   "*"  " "   " "  " " " "   " "   " "    " "   " "    " "   "*" 
+## 5  ( 1 )  "*"   "*"  " "   " "  " " " "   " "   " "    " "   " "    " "   "*" 
+## 6  ( 1 )  "*"   "*"  " "   " "  " " "*"   " "   " "    " "   " "    " "   "*" 
+## 7  ( 1 )  "*"   "*"  " "   " "  " " "*"   " "   " "    " "   " "    " "   "*" 
+## 8  ( 1 )  "*"   "*"  " "   " "  " " "*"   " "   " "    " "   " "    "*"   "*" 
+## 9  ( 1 )  "*"   "*"  " "   " "  " " "*"   " "   "*"    " "   " "    "*"   "*" 
+## 10  ( 1 ) "*"   "*"  " "   " "  " " "*"   " "   "*"    " "   " "    "*"   "*" 
+## 11  ( 1 ) "*"   "*"  " "   " "  " " "*"   " "   "*"    " "   " "    "*"   "*" 
+## 12  ( 1 ) "*"   "*"  " "   "*"  " " "*"   " "   "*"    " "   " "    "*"   "*" 
+## 13  ( 1 ) "*"   "*"  " "   "*"  " " "*"   " "   "*"    " "   " "    "*"   "*" 
+## 14  ( 1 ) "*"   "*"  "*"   "*"  " " "*"   " "   "*"    " "   " "    "*"   "*" 
+## 15  ( 1 ) "*"   "*"  "*"   "*"  " " "*"   " "   "*"    "*"   " "    "*"   "*" 
+## 16  ( 1 ) "*"   "*"  "*"   "*"  "*" "*"   " "   "*"    "*"   " "    "*"   "*" 
+## 17  ( 1 ) "*"   "*"  "*"   "*"  "*" "*"   " "   "*"    "*"   " "    "*"   "*" 
+## 18  ( 1 ) "*"   "*"  "*"   "*"  "*" "*"   "*"   "*"    "*"   " "    "*"   "*" 
+## 19  ( 1 ) "*"   "*"  "*"   "*"  "*" "*"   "*"   "*"    "*"   "*"    "*"   "*" 
+##           CWalks LeagueN DivisionW PutOuts Assists Errors NewLeagueN
+## 1  ( 1 )  " "    " "     " "       " "     " "     " "    " "       
+## 2  ( 1 )  " "    " "     " "       " "     " "     " "    " "       
+## 3  ( 1 )  " "    " "     " "       "*"     " "     " "    " "       
+## 4  ( 1 )  " "    " "     "*"       "*"     " "     " "    " "       
+## 5  ( 1 )  " "    " "     "*"       "*"     " "     " "    " "       
+## 6  ( 1 )  " "    " "     "*"       "*"     " "     " "    " "       
+## 7  ( 1 )  "*"    " "     "*"       "*"     " "     " "    " "       
+## 8  ( 1 )  "*"    " "     "*"       "*"     " "     " "    " "       
+## 9  ( 1 )  "*"    " "     "*"       "*"     " "     " "    " "       
+## 10  ( 1 ) "*"    " "     "*"       "*"     "*"     " "    " "       
+## 11  ( 1 ) "*"    "*"     "*"       "*"     "*"     " "    " "       
+## 12  ( 1 ) "*"    "*"     "*"       "*"     "*"     " "    " "       
+## 13  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    " "       
+## 14  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    " "       
+## 15  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    " "       
+## 16  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    " "       
+## 17  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    "*"       
+## 18  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    "*"       
+## 19  ( 1 ) "*"    "*"     "*"       "*"     "*"     "*"    "*"
+which.max(sum.step$rsq)
+## [1] 19
+The model with 19 predictors is considered the “best” in terms of R^2,meaning it explains the highest proportion of variance in the salary.
+e
+plot(stepwise,scale="r2",main="Forward Stepwise Selection")
+ 
+f
+model.list <- list()
+bic.values <- numeric()
+r.squared.list <- numeric()
+selected.vars <- c()
+for (step in 1:length(variables)){
+  best.rsquared <- 0
+  best.var <- NULL
+  best.bic <- Inf
+  for(var in setdiff(variables,selected.vars)){
+    formula <- as.formula(paste("Salary ~",paste(c(selected.vars,var),collapse=" + ")))
+    model <- lm(formula,data=Hitters)
+    r.squared <- summary(model)$r.squared
+    bic.value <- BIC(model)
+    if(r.squared>best.rsquared) {
+      best.rsquared <- r.squared
+      best.var <- var
+      best.bic <- bic.value
+    }
+  }
+  selected.vars <- c(selected.vars,best.var)
+  model.list[[step]] <- selected.vars
+  r.squared.list[step] <- best.rsquared
+  bic.values[step] <- best.bic
+}
+for (i in 1:length(model.list)) {
+  cat("Step",i,": Model with variables:",paste(model.list[[i]],collapse=","),"\n")
+  cat("R-squared:",r.squared.list[i],"\n\n")
+}
+## Step 1 : Model with variables: CRBI 
+## R-squared: 0.3214501 
+## 
+## Step 2 : Model with variables: CRBI,Hits 
+## R-squared: 0.4252237 
+## 
+## Step 3 : Model with variables: CRBI,Hits,PutOuts 
+## R-squared: 0.4514294 
+## 
+## Step 4 : Model with variables: CRBI,Hits,PutOuts,Division 
+## R-squared: 0.4754067 
+## 
+## Step 5 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat 
+## R-squared: 0.4908036 
+## 
+## Step 6 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks 
+## R-squared: 0.5087146 
+## 
+## Step 7 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks 
+## R-squared: 0.5132286 
+## 
+## Step 8 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns 
+## R-squared: 0.5281386 
+## 
+## Step 9 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat 
+## R-squared: 0.5346124 
+## 
+## Step 10 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists 
+## R-squared: 0.540495 
+## 
+## Step 11 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League 
+## R-squared: 0.5426153 
+## 
+## Step 12 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs 
+## R-squared: 0.5436302 
+## 
+## Step 13 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors 
+## R-squared: 0.544457 
+## 
+## Step 14 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors,HmRun 
+## R-squared: 0.5452164 
+## 
+## Step 15 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors,HmRun,CHits 
+## R-squared: 0.5454692 
+## 
+## Step 16 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors,HmRun,CHits,RBI 
+## R-squared: 0.5457656 
+## 
+## Step 17 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors,HmRun,CHits,RBI,NewLeague 
+## R-squared: 0.5459518 
+## 
+## Step 18 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors,HmRun,CHits,RBI,NewLeague,Years 
+## R-squared: 0.5460945 
+## 
+## Step 19 : Model with variables: CRBI,Hits,PutOuts,Division,AtBat,Walks,CWalks,CRuns,CAtBat,Assists,League,Runs,Errors,HmRun,CHits,RBI,NewLeague,Years,CHmRun 
+## R-squared: 0.5461159
+First variable added:CRBI,which alone explains 32.15% of the variance in salary(R^2=0.3215).
+Incremental improvements:Adding variables like Hits,PutOuts,and Division results in notable increases in (R^2),especially in the early steps.
+Final model:The full model includes all 19 variables with an R^2 of 0.5461,indicating that 54.61% of the variance in salary is explained by the model.
+g
+bic.values
+##  [1] 3874.856 3836.776 3830.075 3823.893 3821.631 3817.785 3820.930 3818.320
+##  [9] 3820.259 3822.486 3826.841 3831.829 3836.925 3842.058 3847.484 3852.884
+## [17] 3858.349 3863.838 3869.398
+The minimum BIC value is 3817.785,which is in step 6,indicating that the model built in step 6 is the best and balances the model’s fit and complexity.After step 6,as the number of variables increases,the BIC value begins to rise,indicating that although the model becomes more complex,the risk of overfitting increases.From the perspective of BIC,the model in step 6 is the best.This model contains the following variables:CRBI,Hits,PutOuts,Division,AtBat,Walks.
