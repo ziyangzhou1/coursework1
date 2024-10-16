@@ -1,0 +1,4 @@
+models,MSE
+MLR 1,14864.634412199297
+MLR 2 (with 5 dummy nationalities),14789.979569246547
+MLR 3 (with some additional vars),14792.404103358771
